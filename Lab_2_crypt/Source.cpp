@@ -11,11 +11,11 @@ string addition(string coefs1, string coefs2) {
 	string result = "";
 	if (coefs1.length() != coefs2.length()) {
 		if (coefs1.length() < coefs2.length()) {
-			coefs1.append( coefs2.length() - coefs1.length(),'0');
+			coefs1.insert( coefs1.begin(),coefs2.length() - coefs1.length(),'0');
 		}
 		else
-			coefs2.append(coefs1.length() - coefs2.length(), '0');
-	}
+			coefs2.insert(coefs2.begin(),coefs1.length() - coefs2.length(), '0');
+	} 
 	for (int i = 0; i < coefs1.length(); i++) {
 		result+= to_string((coefs1[i] ^ coefs2[i]));
 	}
@@ -23,30 +23,38 @@ string addition(string coefs1, string coefs2) {
 }
 
 string division(string coefs1, string coefs2) {
-	int count = 0;
-	int result = 0;
+	int temp;
+	int res = 0;
 	int c1 = strtoul(coefs1.c_str(), NULL, 2);
 	int c2 = strtoul(coefs2.c_str(), NULL, 2);
-	while ((count = (int)log2(c1) - (int)log2(c2)) >= 0) {
-		c1 = c1 ^ (c2 << count);
-		result += 1 << count;
+	int lg1 = (int)log2(c1);
+	int lg2 = (int)log2(c2);
+	while (lg1 - lg2 >= 0 && c1!=0) {
+	/*	temp = c2;
+		temp = temp << (lg1 - lg2);
+		res += 1 << (lg1 - lg2);
+		c1 = c1 ^ temp;
+		lg1 = (int)log2(c1);
+		*/
+		c1 = c1 ^ ( c2 << lg1 - lg2 );
+		res += 1 << lg1 - lg2;
+		lg1 = (int)log2(c1);
 	}
-	string res = std::bitset<8>(result).to_string();
-	return res;
+	string result = std::bitset<16>(res).to_string();
+	return result;
 }
 
+
 string multiplication(string coefs1, string coefs2,string poly) {
-	string result;
 	int res = 0;
-
-	int c1 = strtoul(coefs1.c_str(), NULL, 2);;
-	int c2 = strtoul(coefs2.c_str(), NULL, 2);;
-
-	while ((int)log2(c1)) {
-		res += c2 << (coefs1.length() - (int)log2(c1));
+	int c1 = strtoul(coefs1.c_str(), NULL, 2);
+	int c2 = strtoul(coefs2.c_str(), NULL, 2);
+	for (int i = 0; i < coefs1.length(); i++) {
+		if (coefs1[i] == '1')
+			res = res ^ (c2 << (coefs1.length() - 1 - i));
 	}
-//	fout << res;
-	division(result, poly);
+	string result = std::bitset<16>(res).to_string();
+	result = division(result, poly);
 	return result;
 }
 
@@ -54,7 +62,7 @@ string multiplication(string coefs1, string coefs2,string poly) {
 string exponentiation(string coefs, string operation,string poly) {
 	int power = atoi((operation.erase(0, 1)).c_str());
 	string result = coefs;
-	for (int i = 0; i < power; i++ ) {
+	for (int i = 1; i < power; i++ ) {
 		result = multiplication(result, coefs,poly);
 	}
 	return result;
@@ -63,7 +71,9 @@ string exponentiation(string coefs, string operation,string poly) {
 string exponentiation_1(string coefs,string poly) {
 	// a*x = 1(mod m)
 	// x = (a % m + m) % m;
-	return division(addition(division(coefs,poly),poly),poly);
+	string res = division(addition(division(coefs, poly), poly), poly);
+//	return res;
+	return multiplication(res,coefs,poly);
 }
 
 
@@ -106,4 +116,5 @@ int main() {
 			fout << exponentiation(input_vector[0], input_vector[1], poly);
 	}
 	return 0;
-}
+} 
+

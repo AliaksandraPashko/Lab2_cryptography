@@ -1,4 +1,1 @@
-﻿  Source.cpp
-d:\visual studio projects\lab_2_crypt\lab_2_crypt\source.cpp(21): warning C4018: '<': signed/unsigned mismatch
-d:\visual studio projects\lab_2_crypt\lab_2_crypt\source.cpp(57): warning C4018: '<': signed/unsigned mismatch
-  Lab_2_crypt.vcxproj -> D:\Visual Studio Projects\Lab_2_crypt\Debug\Lab_2_crypt.exe
+﻿  Lab_2_crypt.vcxproj -> D:\VisualStudioProjects\Lab_2_crypt\Debug\Lab_2_crypt.exe
