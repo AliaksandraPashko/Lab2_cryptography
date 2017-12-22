@@ -22,7 +22,7 @@ string addition(string coefs1, string coefs2) {
 	return result;
 }
 
-string division(string coefs1, string coefs2) {
+string division(string coefs1, string coefs2,bool need_ost) {
 	int temp;
 	int res = 0;
 	int c1 = strtoul(coefs1.c_str(), NULL, 2);
@@ -40,8 +40,14 @@ string division(string coefs1, string coefs2) {
 		res += 1 << lg1 - lg2;
 		lg1 = (int)log2(c1);
 	}
-	string result = std::bitset<16>(res).to_string();
-	return result;
+	string ost = coefs1;
+	if (need_ost){
+		return std::bitset<16>(c1).to_string();
+	}
+	else {
+		string result = std::bitset<32>(res).to_string();
+		return result;
+	}
 }
 
 
@@ -51,11 +57,11 @@ string multiplication(string coefs1, string coefs2,string poly) {
 	int c2 = strtoul(coefs2.c_str(), NULL, 2);
 	for (int i = 0; i < coefs1.length(); i++) {
 		if (coefs1[i] == '1')
-			res = res ^ (c2 << (coefs1.length() - 1 - i));
+			res = res ^ (c2 << (coefs1.length())-1 -i);
 	}
-	string result = std::bitset<16>(res).to_string();
-	result = division(result, poly);
-	return result;
+	string result = std::bitset<32>(res).to_string();
+	return division(result, poly,1);
+	//return result;
 }
 
 
@@ -68,12 +74,32 @@ string exponentiation(string coefs, string operation,string poly) {
 	return result;
 }
 
+int gcd(int a, int b, int& x, int& y, string poly) {
+	if (a == 0) {
+		x = 0;
+		y = 1;
+		return b;
+	}
+	int x1, y1;
+	string a_ = std::bitset<16>(a).to_string();
+	string b_ = std::bitset<16>(b).to_string();
+	if (strtoul(multiplication(a_, b_, poly).c_str(), NULL, 2) == 1)
+		return a;
+ 	int d = gcd(strtoul(division(b_,a_,0).c_str(), NULL, 2), a, x1, y1, poly);
+	string div = division(b_, a_, 0);
+	int mul = strtoul(multiplication(div, std::bitset<16>(x1).to_string(), poly).c_str(), NULL, 2);
+	x = y1 ^ mul;
+	y = x1;
+	return d;
+}
+
 string exponentiation_1(string coefs,string poly) {
-	// a*x = 1(mod m)
-	// x = (a % m + m) % m;
-	string res = division(addition(division(coefs, poly), poly), poly);
-//	return res;
-	return multiplication(res,coefs,poly);
+	int x, y;
+	int a = strtoul(coefs.c_str(), NULL, 2);
+	int m = strtoul(poly.c_str(), NULL, 2);
+	x = gcd(a, m, x, y, poly);
+	//return multiplication(std::bitset<16>(x).to_string(), coefs, poly);
+	return std::bitset<16>(x).to_string();
 }
 
 
@@ -103,7 +129,7 @@ int main() {
 				fout << multiplication(input_vector[0], input_vector[2],poly);
 			break;
 		case '/':
-				fout << division(input_vector[0], input_vector[2]);
+				fout << division(input_vector[0], input_vector[2], 0);
 			break;
 		default:
 			break;
